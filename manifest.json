@@ -1,0 +1,35 @@
+{
+  "name": "Módulo de Mapas de Aplicación · Aguilón Electroelectrónico",
+  "short_name": "Mapas Aguilón",
+  "description": "Mapas de calidad de aplicación del aguilón electroelectrónico del Ingenio Madre Tierra: elaboración, archivo y avance por finca, lote y labor.",
+  "lang": "es-GT",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FFFFFF",
+  "theme_color": "#00963F",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "icono-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icono-recortable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Crear mapa",
+      "short_name": "Crear",
+      "description": "Subir el trabajo del aguilón y generar el mapa",
+      "url": "./index.html?ir=subir",
+      "icons": [{ "src": "icono-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mapa de avance",
+      "short_name": "Avance",
+      "description": "Ver el avance de la zona sobre el mapa",
+      "url": "./index.html?ir=inicio",
+      "icons": [{ "src": "icono-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

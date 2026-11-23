@@ -1,0 +1,14 @@
+# Lo que nunca debe subir
+*.jks
+*.keystore
+*.jks.b64
+LIBRO_*.xlsx
+*.zip
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+# Basura del sistema
+.DS_Store
+Thumbs.db
