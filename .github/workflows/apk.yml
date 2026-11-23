@@ -35,8 +35,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # v4 y no v3: la v3 instalaba el paquete 'tools' del SDK, que Google
+      # quito del repositorio, y sdkmanager se caia antes de compilar nada.
+      # La v4 instala solo platform-tools. Se le pasa igual el paquete a
+      # mano, para no depender de cual sea el valor por omision.
       - name: Preparar Android
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
 
       - name: Preparar Gradle
         uses: gradle/actions/setup-gradle@v3

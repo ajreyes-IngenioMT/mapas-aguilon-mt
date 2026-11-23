@@ -120,6 +120,10 @@
     padding:12px 14px;margin:0 0 14px!important}
   .dialogo a.btn{display:inline-flex;align-items:center;justify-content:center;
     text-decoration:none}
+  .dialogo a.btn.apagado{background:var(--linea);color:var(--texto2);
+    pointer-events:none}
+  .nota-apk{margin:14px 0 0!important;font-size:13px}
+  .nota-apk.mala{color:#A4321E;font-weight:600}
   .btn-instalar{display:flex;align-items:center;justify-content:center;gap:9px;
     width:100%;box-sizing:border-box;margin-top:14px;background:#fff;
     border:1px solid var(--linea);color:var(--verde-osc);border-radius:10px;
@@ -1118,7 +1122,7 @@
     <a class="btn" id="apkBajar" href="#" target="_blank" rel="noopener">Descargar</a>
     <button class="btn sec" onclick="cerrarDialogoAPK()">Cerrar</button>
   </div>
-  <p class="sub" style="margin:14px 0 0;font-size:13px">Si la descarga no empieza,
+  <p class="sub nota-apk" id="apkNota">Si la descarga no empieza,
   <a id="apkOtra" href="#" target="_blank" rel="noopener">ábrala desde aquí</a>.</p>
 </div>
 
@@ -3819,6 +3823,41 @@ function abrirDialogoAPK() {
   document.getElementById('apkOtra').href = PAGINA_APK;
   document.getElementById('veloAPK').className = 'velo';
   document.getElementById('modalAPK').className = 'dialogo';
+
+  /* Mientras no se haya compilado el primer APK, la direccion de descarga
+     lleva a un 404 de GitHub que no le dice nada a nadie. Se pregunta antes
+     y, si no hay publicacion, se dice con palabras. */
+  comprobarQueHayAPK();
+}
+
+/** Apaga la descarga, con su explicacion, si todavia no hay APK publicado. */
+function comprobarQueHayAPK() {
+  var boton = document.getElementById('apkBajar');
+  var nota = document.getElementById('apkNota');
+
+  function hay() {
+    boton.className = 'btn';
+    boton.removeAttribute('aria-disabled');
+    nota.className = 'sub nota-apk';
+  }
+  function noHay(porque) {
+    boton.className = 'btn apagado';
+    boton.setAttribute('aria-disabled', 'true');
+    nota.className = 'sub nota-apk mala';
+    nota.innerHTML = porque;
+  }
+
+  fetch('https://api.github.com/repos/' + REPO_APK + '/releases/latest')
+    .then(function (r) {
+      if (r.status === 404) {
+        noHay('Todav\u00eda no hay ninguna versi\u00f3n publicada de la aplicaci\u00f3n. ' +
+              'Av\u00edsele al administrador del m\u00f3dulo.');
+        return;
+      }
+      if (!r.ok) return hay();        // sin cupo o sin señal: que lo intente
+      hay();
+    })
+    .catch(function () { hay(); });   // sin señal no se puede saber: no estorbar
 }
 
 function cerrarDialogoAPK() {
