@@ -1636,8 +1636,9 @@ function detectarLotes(job, maestro, opciones) {
       indice: idx, ids: [], area: 0, suma: 0, n: 0,
       lote: String(maestro.atributos[idx][maestro.campoLote] || '').trim(),
       atributos: maestro.atributos[idx],
-      areaLote: areaPoligono(maestro.formas[idx]) / 10000
+      areaLote: 0   /* se llena abajo, ya con el codigo de lote en la mano */
     });
+    if (!e.areaLote) e.areaLote = areaDeLote_(e.lote, maestro.formas[idx]);
     e.ids.push(i); e.area += area; e.suma += vel; e.n++;
   }
 
@@ -1749,7 +1750,7 @@ function procesarAplicacion(job, maestro, opciones) {
     var lote = String(maestro.atributos[idx][maestro.campoLote] || '').trim();
     var r = resumen[lote] || (resumen[lote] = {
       lote: lote, atributos: maestro.atributos[idx],
-      areaLote: areaPoligono(maestro.formas[idx]) / 10000,
+      areaLote: areaDeLote_(lote, maestro.formas[idx]),
       area: 0, Baja: 0, Ideal: 0, Alta: 0, suma: 0, n: 0, vmin: Infinity, vmax: -Infinity
     });
     r.area += area; r[cl] += area; r.suma += vel; r.n++;
@@ -3823,6 +3824,43 @@ function dentroMerc(anillos, x, y) {
 var DATOS = null;
 var INDICE = {};        // zona -> finca -> [lotes]
 var LOTE_INFO = {};     // zona|finca|lote -> {area, desc, variedad}
+
+/**
+ * El area de un lote, tomada del maestro del ingenio.
+ *
+ * Importa cual de las dos se usa. El area del DIBUJO —la que sale de medir
+ * el poligono publicado— casi nunca coincide con la oficial: difiere por
+ * como se digitalizo el lote y por la proyeccion. En el lote 0210301 la
+ * diferencia es de 26.18 contra 26.25.
+ *
+ * La que manda es la del maestro: es contra la que liquida bodega, la que
+ * se ve en la pantalla de captura y la que la gente reconoce. Que el PDF
+ * enseñara otra era un error: el mismo lote salia con dos areas distintas
+ * dentro del mismo trabajo.
+ *
+ * Si el lote no esta en el catalogo —un maestro con lotes que el catalogo
+ * todavia no tiene— se cae a la del dibujo, que es mejor que nada, pero
+ * eso es la excepcion.
+ */
+function areaDeLote_(lote, forma) {
+  var d = DE_LOTE[normLote(lote)];
+  if (d) {
+    var info = LOTE_INFO[d.zona + '|' + d.finca + '|' + lote];
+    if (info) {
+      var a = Number(info.area);
+      if (isFinite(a) && a > 0) return a;
+    }
+  }
+  /* Solo se mide el dibujo cuando de verdad hace falta: es el camino raro
+     y ademas el caro. El try es por si llega una forma incompleta: esto
+     corre dentro de la elaboracion del mapa, y aqui una excepcion se
+     llevaria el mapa entero por un dato de un solo lote. */
+  try {
+    return forma ? areaPoligono(forma) / 10000 : 0;
+  } catch (e) {
+    return 0;
+  }
+}
 var DE_LOTE = {};       // lote -> {finca, zona}, sacado del catálogo
 var FINCAS_CAT = {};    // nombre de finca normalizado -> nombre tal cual
 var LOTES_FINCA = [];   // lotes de la finca elegida, con sus labores ya cargadas
