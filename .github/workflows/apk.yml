@@ -101,7 +101,11 @@ jobs:
           DESTINO="mapas-aguilon-${{ steps.version.outputs.nombre }}.apk"
           cp "$ORIGEN" "$GITHUB_WORKSPACE/$DESTINO"
           echo "archivo=$DESTINO" >> "$GITHUB_OUTPUT"
-          ls -lh "$GITHUB_WORKSPACE/$DESTINO"
+          # Y una copia con nombre fijo, para que el boton del modulo pueda
+          # apuntar siempre a la misma direccion:
+          #   .../releases/latest/download/mapas-aguilon.apk
+          cp "$ORIGEN" "$GITHUB_WORKSPACE/mapas-aguilon.apk"
+          ls -lh "$GITHUB_WORKSPACE/$DESTINO" "$GITHUB_WORKSPACE/mapas-aguilon.apk"
 
       # Queda guardado aquí por si se quiere bajar sin publicar.
       - name: Guardar el APK en la compilación
@@ -118,15 +122,28 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.nombre }}
           name: Mapas Aguilón ${{ steps.version.outputs.nombre }}
-          files: ${{ steps.apk.outputs.archivo }}
+          files: |
+            ${{ steps.apk.outputs.archivo }}
+            mapas-aguilon.apk
           body: |
             **Módulo de Mapas de Aplicación · Ingenio Madre Tierra**
 
             Versión ${{ steps.version.outputs.nombre }} para Android 5.0 en adelante.
 
-            Bájelo desde el teléfono y ábralo para instalarlo. Si ya tiene
-            una versión instalada, ésta se instala encima: **no hay que
-            desinstalar** y no se pierde nada de lo capturado.
+            ## Si es la primera vez
+
+            Bájelo desde el teléfono y ábralo. Android va a preguntar si
+            permite instalar aplicaciones de esta procedencia: hay que
+            decirle que sí, una sola vez.
+
+            ## Si ya tiene el módulo instalado
+
+            **Ábralo encima del que ya tiene. NO lo desinstale.**
+
+            Al desinstalar se pierde la sesión y, sobre todo, la cola de
+            mapas que estén esperando señal para subir. Instalando encima no
+            se pierde nada: es la misma llave de firma y Android lo reconoce
+            como la misma aplicación.
 
             Recuerde que el contenido del módulo se actualiza solo: esta
             aplicación solo hay que cambiarla cuando se avise.

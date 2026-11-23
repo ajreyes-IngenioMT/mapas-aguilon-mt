@@ -79,6 +79,13 @@ public class MainActivity extends AppCompatActivity {
         s.setJavaScriptCanOpenWindowsAutomatically(false);
         s.setTextZoom(100);                    // el tamaño lo manda el diseño, no el sistema
 
+        /* Se le pega la versión a la firma del navegador. Es así como la
+           página sabe dos cosas que no podría saber de otro modo: que está
+           corriendo dentro de la aplicación —para no ofrecer instalarla
+           cuando ya está instalada— y qué versión tiene puesta el teléfono,
+           para avisar cuando salga una más nueva. */
+        s.setUserAgentString(s.getUserAgentString() + " MapasAguilonApp/" + versionPuesta());
+
         // Sin señal se usa lo guardado; con señal se pide al servidor.
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
 
@@ -97,6 +104,16 @@ public class MainActivity extends AppCompatActivity {
             web.restoreState(guardado);
         } else {
             web.loadUrl(INICIO);
+        }
+    }
+
+    /** La versión de esta aplicación, tal como la numeró GitHub al compilar. */
+    private String versionPuesta() {
+        try {
+            String v = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            return (v == null || v.isEmpty()) ? "0" : v;
+        } catch (Exception e) {
+            return "0";
         }
     }
 

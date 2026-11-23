@@ -26,7 +26,7 @@
  * mapa en el campo es peor que esperar.
  * =================================================================== */
 
-var VERSION = 'mapas-v3';
+var VERSION = 'mapas-v4';
 var CACHE_APP    = VERSION + '-app';      // la pantalla y sus archivos
 var CACHE_MAPA   = VERSION + '-mapa';     // Leaflet
 var CACHE_IMAGEN = VERSION + '-imagen';   // las imágenes de satélite
