@@ -85,7 +85,27 @@ jobs:
           if [ "${{ steps.firma.outputs.hay }}" = "si" ]; then
             ARGS="$ARGS -PalmacenFirma=$RUNNER_TEMP/mapas.jks -PclaveAlmacen=$CLAVE_ALMACEN -PaliasFirma=$ALIAS -PclaveClave=$CLAVE_CLAVE"
           fi
-          gradle --no-daemon assembleRelease $ARGS
+
+          # Se reintenta porque Maven Central contesta 429 (demasiadas
+          # peticiones) cuando le pegan muchos runners de GitHub desde la
+          # misma direccion. No es un error del proyecto y se arregla solo
+          # esperando: sin reintento, que el APK salga o no es cuestion de
+          # suerte. Gradle no reintenta un 429 por su cuenta.
+          for intento in 1 2 3; do
+            echo "::group::Intento $intento"
+            if gradle --no-daemon assembleRelease $ARGS; then
+              echo "::endgroup::"
+              echo "Compilado en el intento $intento."
+              exit 0
+            fi
+            echo "::endgroup::"
+            if [ "$intento" -lt 3 ]; then
+              echo "::warning::Fallo el intento $intento. Se espera 60 s y se reintenta."
+              sleep 60
+            fi
+          done
+          echo "::error::No se pudo compilar despues de 3 intentos."
+          exit 1
 
       - name: Comprobar que quedó firmado
         if: steps.firma.outputs.hay == 'si'
