@@ -91,6 +91,9 @@
        padding:4px 12px;margin-left:10px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700}
 
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+  /* Los filtros del avance son selectores cortos: con 260 px de minimo
+     sobraba espacio y entraban menos de los que caben. */
+  #vFiltros,.grid.filtros{grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:14px}
   label{display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--tenue);
         text-transform:uppercase;letter-spacing:1.4px}
   select,input[type=text],input[type=email],input[type=password],input[type=date],textarea{
@@ -548,7 +551,7 @@
   #pInicio .kpi b{font-size:27px}
   #pInicio .kpi span{font-size:11px;letter-spacing:1px;margin-top:4px}
   #pInicio .panel{padding:16px 20px;margin-top:16px}
-  #pInicio .grid{gap:14px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));align-items:end}
+  #pInicio .grid{gap:14px;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));align-items:end}
   .sin-rotulo button{width:100%}
   #pInicio #vPanelMapa{padding-top:14px}
   #pInicio #vPanelMapa h2{margin-top:0;margin-bottom:8px}
@@ -652,6 +655,22 @@
     .resumen-job .kpis.chicos{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
     .accesos,#pInicio .accesos,.cards,.grid{grid-template-columns:1fr;gap:12px}
     .dos-col{grid-template-columns:1fr}
+
+    /* Los filtros son selectores cortos —Zona, Finca, Labor, Catorcena,
+       Mes— y apilados de uno en uno obligaban a arrastrar la pantalla
+       entera para ver los ultimos. De dos en dos caben casi todos de una
+       vista. Esto NO aplica a las rejillas de los formularios de captura:
+       ahi el nombre y la dosis necesitan el ancho completo. */
+    #vFiltros,#pInicio .grid,.grid.filtros{
+      grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:10px}
+    #vFiltros label,#pInicio .grid label,.grid.filtros label{font-size:11px;
+      margin-bottom:5px;letter-spacing:.6px}
+    /* 15 px en los selectores no hace zoom en iOS —el telefono abre su
+       propia rueda— al contrario de lo que pasa con los campos de texto. */
+    #vFiltros select,#pInicio .grid select,.grid.filtros select{min-height:42px;
+      padding:9px 30px 9px 11px;font-size:15px;background-position:right 9px center}
+    #vFiltros .btn,#pInicio .grid .btn,.grid.filtros .btn{min-height:42px;
+      font-size:14.5px;padding:0 14px}
 
     /* ---- menos relleno: el espacio en blanco se paga caro aqui ---- */
     .acceso{padding:16px}

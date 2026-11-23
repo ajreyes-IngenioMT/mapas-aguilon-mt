@@ -51,7 +51,7 @@ var CREDITO_APP = 'Desarrollado por Armando Reyes';
 
 /* Sello del código. Si la aplicación no lo muestra en el pie, la versión
    publicada está desactualizada y hay que volver a implementar. */
-var VERSION_APP = 'v32';            // sirve para saber si el script quedo viejo
+var VERSION_APP = 'v33';            // sirve para saber si el script quedo viejo
 var FECHA_APP = '2026-11-23';       // lo unico que se ensena en el pie
 var MINUTOS_SESION = 120;
 var MINUTOS_CACHE_TABLERO = 10;
