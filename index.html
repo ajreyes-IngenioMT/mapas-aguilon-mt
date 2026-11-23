@@ -4,12 +4,20 @@
 <base target="_top">
   <title>Mapas de Aplicación · Aguilón Electroelectrónico</title>
 <meta charset="utf-8">
+<!-- Sin esta linea el telefono finge una pantalla de 980 px y encoge la
+     pagina: nada se adapta, ninguna regla de pantalla chica se aplica, y
+     hay que arrastrar de lado para ver el contenido. Es la diferencia
+     entre una pagina de computadora apretada y una aplicacion. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
     --verde:#00963F; --verde-osc:#007532; --lima:#8CC63F; --lima-cl:#DDEBC4;
     --texto:#2F3A33; --texto2:#4A564E; --tenue:#7A857D;
     --linea:#DFE4DC; --linea2:#EDF0EA; --panel:#FFFFFF; --fondo:#F2F4F0;
+    /* Se usaba en varios :hover sin estar definido, asi que esos fondos
+       simplemente no existian. */
+    --verde-claro:#E8F4EC;
     --alerta:#C4621B; --alerta-bg:#FBF0E7;
     --sans:'Lato','Segoe UI',Calibri,Arial,sans-serif;
   }
@@ -546,19 +554,132 @@
   #pInicio #vPanelMapa h2{margin-top:0;margin-bottom:8px}
   #pInicio .filtro-labor{margin:8px 0 10px}
 
-  @media (max-width:760px){
-    .lateral{width:100%;height:68px;bottom:auto;flex-direction:row;padding:0 10px;gap:4px}
-    .lateral .emblema{margin:0 10px 0 0;width:38px;height:38px}
-    .lateral button{width:58px;height:54px;font-size:9px}
-    .hero-compacto .logo-hero{display:none}
-    .hero-compacto h1{font-size:28px}
-    .acceso{padding:18px}
-    .lateral .separa{flex:1 1 auto}
+  /* El boton de las tres rayas y el velo: definidos ANTES del bloque de
+     telefono a proposito. Si se definen despues, su display:none gana por
+     orden sobre el display:flex de la media query y el boton no sale
+     nunca. */
+  .tres-rayas{display:none;align-items:center;justify-content:center;
+    width:44px;height:44px;flex:0 0 auto;border:0;border-radius:12px;
+    background:var(--verde-claro);color:var(--verde-osc);cursor:pointer;
+    padding:0;margin-right:2px}
+  .tres-rayas svg{width:24px;height:24px;fill:none;stroke:currentColor;
+    stroke-width:2.2;stroke-linecap:round}
+  .velo-cajon{display:none}
+
+  /* ==================================================================
+   *  EN EL TELEFONO
+   *
+   *  La barra lateral se sale de la pantalla y se abre con el boton de
+   *  las tres rayas. Se probaron las otras dos formas y no sirven aqui:
+   *  dejarla fija come 86 px de ancho, que en un telefono de 360 es casi
+   *  la cuarta parte; y ponerla de barra arriba deja los rotulos
+   *  ilegibles y roba altura, que es justo lo que falta cuando se esta
+   *  viendo un mapa.
+   *
+   *  El cajon se cierra solo al escoger, porque nadie quiere cerrar a
+   *  mano lo que ya termino de usar.
+   * ================================================================== */
+  @media (max-width:820px){
+
+    /* ---- el cajon ---- */
+    .lateral{width:252px;transform:translateX(-100%);
+      transition:transform .22s ease;box-shadow:0 0 26px rgba(0,0,0,.3);
+      align-items:stretch;padding:14px 12px 16px}
+    body.cajonAbierto .lateral{transform:translateX(0)}
+    .lateral .emblema{align-self:flex-start;margin:0 0 16px 6px}
+    /* Los botones pasan a fila con rotulo al lado: en un cajon ancho se
+       leen, y el area de toque llega a lo que pide una pantalla tactil. */
+    .lateral button{width:100%;height:auto;min-height:52px;flex-direction:row;
+      justify-content:flex-start;gap:14px;padding:0 14px;font-size:15.5px;
+      letter-spacing:0;border-radius:12px}
+    .lateral button svg{width:23px;height:23px;flex:0 0 auto}
+
+    /* ---- el velo de atras ---- */
+    .velo-cajon{display:block;position:fixed;inset:0;background:rgba(14,30,20,.46);
+      z-index:880;opacity:0;pointer-events:none;transition:opacity .22s}
+    body.cajonAbierto .velo-cajon{opacity:1;pointer-events:auto}
+
+    /* ---- el contenido recupera el ancho completo ---- */
     body.conLateral header,
     body.conLateral .franja,
-    body.conLateral main{margin-left:0;margin-top:0}
-    body.conLateral header{margin-top:68px}
+    body.conLateral main{margin-left:0}
+
+    /* ---- el boton de las tres rayas ---- */
+    .tres-rayas{display:flex}
+
+    /* ---- la cabecera: UNA sola fila, y nada mas ----
+       En el telefono la cabecera tiene que ocupar lo minimo: lo que la
+       gente viene a ver es el mapa y los numeros, no el membrete. Asi que
+       se deja el logo, que ya dice de quien es, y se quitan el nombre del
+       ingenio y el del departamento, que partidos en tres lineas cada uno
+       se comian media pantalla. El estado de la señal se queda en el
+       punto de color, y el usuario en sus iniciales: los dos se entienden
+       sin el texto, y el texto completo sigue estando al abrir el menu. */
+    header{padding:8px 12px;gap:8px;flex-wrap:nowrap;align-items:center;
+      min-height:58px}
+    .marca img{height:34px;margin-right:0}
+    .marca b,.marca span{display:none}
+    header>div:last-child{gap:8px!important;margin-left:auto}
+    .conexion{padding:0;width:34px;height:34px;justify-content:center;
+      border-radius:50%;gap:0}
+    .conexion span:not(.punto){display:none}
+    .conexion .punto{width:12px;height:12px;border-radius:6px}
+    .chip-usuario{padding:0;width:40px;height:40px;justify-content:center;
+      border-radius:50%;gap:0}
+    .chip-usuario #usuarioActivo,.chip-usuario svg{display:none}
+    .chip-usuario .av{width:34px;height:34px;font-size:13px}
+    .btn-refrescar{width:40px;height:40px;min-height:0;padding:0;
+      justify-content:center;border-radius:50%}
+    .franja{height:4px}
+    main{padding:14px 14px 90px}
+
+    /* ---- nada mas ancho que la pantalla ---- */
+    body{overflow-x:hidden}
+    img,canvas,svg,table{max-width:100%}
+    /* Las tablas anchas se arrastran dentro de su caja, no empujan la
+       pagina: antes bastaba una tabla para desalinear todo lo demas. */
+    .tabla-envoltura{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+    /* ---- iconos y areas de toque de buen tamaño ---- */
+    .btn,.pill,.chip-usuario,.btn-refrescar{min-height:46px}
+    .chip-usuario{padding:7px 12px 7px 8px;font-size:14px}
+    .chip-usuario .avatar{width:30px;height:30px;font-size:12px}
+    select,input[type=text],input[type=password],input[type=number],input[type=date]{
+      min-height:46px;font-size:16px}  /* 16 px evita que iOS haga zoom al tocar */
+
+    /* ---- las rejillas, de dos en dos ---- */
+    #pInicio .kpis,.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .resumen-job .kpis.chicos{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .accesos,#pInicio .accesos,.cards,.grid{grid-template-columns:1fr;gap:12px}
+    .dos-col{grid-template-columns:1fr}
+
+    /* ---- menos relleno: el espacio en blanco se paga caro aqui ---- */
+    .acceso{padding:16px}
+    .kpi{padding:14px 12px}
+    .panel,.caja{padding:16px 14px}
+    .hero-compacto{padding:16px 18px;gap:14px}
+    .hero-compacto .logo-hero{display:none}
+    .hero-compacto h1{font-size:25px}
+    .titulo-pag{font-size:23px}
+
+    /* ---- el menu del usuario, pegado al borde ---- */
+    .menu-usuario{right:10px;left:10px;width:auto}
+
+    /* ---- los dialogos, casi a pantalla completa ---- */
+    .dialogo{width:calc(100vw - 24px);max-width:none;max-height:86vh;overflow-y:auto;
+      padding:20px 18px}
+
+    /* ---- las barras de aviso no tapan el contenido del final ---- */
+    .barra-version{padding:12px 14px;font-size:14.5px;gap:10px}
   }
+
+  /* En pantallas muy angostas, los indicadores de uno en uno: dos columnas
+     parten los numeros grandes en dos lineas y se vuelven ilegibles. */
+  @media (max-width:390px){
+    #pInicio .kpis,.kpis{grid-template-columns:1fr}
+    .marca span{display:none}
+  }
+
 </style>
   <!-- Leaflet para el visor: el mapa se navega (acercar, mover, buscar).
        El mapa del PDF NO lo usa: ése se sigue dibujando en lienzo porque
@@ -631,6 +752,10 @@
 </section>
 
 <header id="cabecera" class="oculto">
+  <button class="tres-rayas" id="tresRayas" onclick="alternarCajon()"
+          aria-label="Menú" aria-expanded="false">
+    <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
   <div class="marca">
     <img alt="Ingenio Madre Tierra" src="data:image/png;base64,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">
     <div>
@@ -1048,6 +1173,9 @@
 </div>
 
 <!-- ================= MENU DEL USUARIO ================= -->
+<!-- Lo que se oscurece detras del cajon. Tocarlo lo cierra. -->
+<div class="velo-cajon" id="veloCajon" onclick="cerrarCajon()"></div>
+
 <div class="menu-usuario oculto" id="menuUsuario">
   <div class="quien">
     <b id="menuNombre"></b>
@@ -5406,7 +5534,40 @@ var NAV = { inicio: 'navInicio', subir: 'navSubir', avance: 'navAvance',
     abrir aqui mismo en vez de tirar al usuario a la portada. */
 var TAB_ACTUAL = 'inicio';
 
+/* ==========================================================================
+ *  EL CAJON DEL TELEFONO
+ *
+ *  En pantalla grande la barra lateral esta siempre a la vista y estas
+ *  funciones no hacen nada visible: la clase se pone igual, pero el CSS
+ *  solo la atiende de 820 px para abajo.
+ * ========================================================================== */
+
+function alternarCajon() {
+  if (document.body.classList.contains('cajonAbierto')) cerrarCajon();
+  else abrirCajon();
+}
+
+function abrirCajon() {
+  document.body.classList.add('cajonAbierto');
+  var b = document.getElementById('tresRayas');
+  if (b) b.setAttribute('aria-expanded', 'true');
+}
+
+function cerrarCajon() {
+  document.body.classList.remove('cajonAbierto');
+  var b = document.getElementById('tresRayas');
+  if (b) b.setAttribute('aria-expanded', 'false');
+}
+
+/* La tecla de escape lo cierra, igual que los dialogos. */
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') cerrarCajon();
+});
+
 function verTab(t) {
+  /* Al escoger se cierra solo: nadie quiere cerrar a mano lo que ya
+     termino de usar. */
+  cerrarCajon();
   TAB_ACTUAL = t;
   recordarPantalla(t);
   TABS.forEach(function (x) {
