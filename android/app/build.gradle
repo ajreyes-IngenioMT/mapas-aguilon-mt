@@ -54,6 +54,14 @@ android {
 }
 
 dependencies {
+    // El BOM alinea todas las piezas de la biblioteca de Kotlin en una sola
+    // version. Hace falta porque appcompat y activity arrastran
+    // kotlin-stdlib 1.8.22, y de la 1.8 en adelante esa pieza ya trae
+    // adentro lo que antes venia aparte en kotlin-stdlib-jdk7 y -jdk8. Sin
+    // alinearlas entran las dos, con las mismas clases dentro, y la
+    // compilacion se cae en checkReleaseDuplicateClasses.
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.22')
+
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.activity:activity:1.8.2'
     implementation 'androidx.core:core:1.12.0'
