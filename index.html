@@ -133,6 +133,7 @@
     text-decoration:none}
   .dialogo a.btn.apagado{background:var(--linea);color:var(--texto2);
     pointer-events:none}
+  #modalAPK .oculto{display:none}
   .nota-apk{margin:14px 0 0!important;font-size:13px}
   .nota-apk.mala{color:#A4321E;font-weight:600}
   .btn-instalar{display:flex;align-items:center;justify-content:center;gap:9px;
@@ -1263,6 +1264,17 @@
     <p>Al desinstalar se pierde la sesión y, sobre todo, la cola de mapas que estén
     esperando señal para subir. Instalando encima no se pierde nada: Android la
     reconoce como la misma aplicación.</p>
+  </div>
+
+  <div class="pasos-apk oculto" id="apkPasosIOS">
+    <p><b>1.</b> Toque el botón de <b>Compartir</b> &mdash; el cuadrito con la
+    flecha hacia arriba, <span id="apkDondeCompartir">abajo, en el centro de la barra</span>.</p>
+    <p><b>2.</b> Baje en la lista y toque <b>Agregar a inicio</b>
+    (<i>Add to Home Screen</i>).</p>
+    <p><b>3.</b> Toque <b>Agregar</b>, arriba a la derecha.</p>
+    <p class="ojo-apk">En iPhone no hay archivo que descargar ni nada que instalar:
+    Apple no lo permite. Esto hace lo mismo &mdash; icono propio, pantalla completa
+    y funciona sin señal &mdash; y se actualiza solo, igual que en Android.</p>
   </div>
 
   <div class="acciones">
@@ -3928,6 +3940,21 @@ function esAndroid() {
   return /Android/i.test(navigator.userAgent || '');
 }
 
+/** iPhone o iPad. El iPad moderno se declara como Mac, de ahi la segunda parte. */
+function esIOS() {
+  var ua = navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua) ||
+         (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
+/** Ya esta puesto en la pantalla de inicio y corriendo como aplicacion. */
+function yaInstaladoComoApp() {
+  if (navigator.standalone === true) return true;          // iOS
+  try {
+    return window.matchMedia('(display-mode: standalone)').matches;
+  } catch (e) { return false; }
+}
+
 /** Compara 1.12 contra 1.9 como numeros, no como texto. */
 function versionMayor(a, b) {
   var x = String(a).replace(/^v/, '').split('.');
@@ -3989,6 +4016,13 @@ function instalarApp(e) {
 }
 
 function abrirDialogoAPK() {
+  /* En iPhone no hay APK que valga: Apple no deja instalar nada fuera de
+     su tienda. Lo que si hay es "Agregar a inicio", que deja el modulo con
+     su icono, a pantalla completa y abriendo sin señal, igual que el APK.
+     Y no se puede abrir solo: Apple no permite que una pagina ofrezca
+     instalarse, asi que lo unico posible es explicar donde esta. */
+  if (esIOS()) return abrirDialogoIOS();
+
   var dentro = !!versionDeLaApp();
 
   /* El texto cambia segun si es la primera vez o es una actualizacion: lo
@@ -4004,6 +4038,9 @@ function abrirDialogoAPK() {
   document.getElementById('apkPasosActualizar').className =
     dentro ? 'pasos-apk' : 'pasos-apk oculto';
 
+  document.getElementById('apkPasosIOS').className = 'pasos-apk oculto';
+  document.getElementById('apkBajar').className = 'btn';
+  document.getElementById('apkNota').className = 'sub nota-apk';
   document.getElementById('apkBajar').href = BAJAR_APK;
   document.getElementById('apkOtra').href = PAGINA_APK;
   document.getElementById('veloAPK').className = 'velo';
@@ -4013,6 +4050,29 @@ function abrirDialogoAPK() {
      lleva a un 404 de GitHub que no le dice nada a nadie. Se pregunta antes
      y, si no hay publicacion, se dice con palabras. */
   comprobarQueHayAPK();
+}
+
+/** En iPhone no se descarga nada: se agrega a la pantalla de inicio. */
+function abrirDialogoIOS() {
+  document.getElementById('apkTitulo').textContent = 'Instalar en el iPhone';
+  document.getElementById('apkSub').textContent =
+    'Queda con su icono, a pantalla completa, y abre sin se\u00f1al.';
+  document.getElementById('apkPasosNuevo').className = 'pasos-apk oculto';
+  document.getElementById('apkPasosActualizar').className = 'pasos-apk oculto';
+  var ios = document.getElementById('apkPasosIOS');
+  ios.className = 'pasos-apk';
+  /* Safari pone Compartir abajo; Chrome y los demas, arriba. */
+  var donde = /CriOS|FxiOS|EdgiOS/.test(navigator.userAgent || '')
+    ? 'arriba, a la par de la direcci\u00f3n'
+    : 'abajo, en el centro de la barra';
+  document.getElementById('apkDondeCompartir').textContent = donde;
+
+  /* No hay nada que descargar: el boton se quita, no se apaga. Un boton
+     gris invita a tocarlo y a preguntarse por que no responde. */
+  document.getElementById('apkBajar').className = 'btn oculto';
+  document.getElementById('apkNota').className = 'sub nota-apk oculto';
+  document.getElementById('veloAPK').className = 'velo';
+  document.getElementById('modalAPK').className = 'dialogo';
 }
 
 /** Apaga la descarga, con su explicacion, si todavia no hay APK publicado. */
@@ -4061,9 +4121,14 @@ function acomodarBotonesDeInstalar() {
   var dentro = !!versionDeLaApp();
   var sirve = !EN_APPS_SCRIPT && !dentro;
 
+  /* Si ya esta puesto en la pantalla de inicio, no hay nada que ofrecer. */
+  if (yaInstaladoComoApp()) sirve = false;
+
   var b = document.getElementById('instalarLogin');
-  /* En el ingreso solo en telefono: en la computadora un APK no sirve. */
-  if (b) b.className = (sirve && esAndroid()) ? 'btn-instalar' : 'btn-instalar oculto';
+  /* En el ingreso solo en telefono —Android o iPhone—: en la computadora
+     no hay nada que instalar. */
+  if (b) b.className = (sirve && (esAndroid() || esIOS()))
+    ? 'btn-instalar' : 'btn-instalar oculto';
 
   /* En el menu tambien desde la computadora, para poder pasar el enlace. */
   var m = document.getElementById('menuInstalar');
